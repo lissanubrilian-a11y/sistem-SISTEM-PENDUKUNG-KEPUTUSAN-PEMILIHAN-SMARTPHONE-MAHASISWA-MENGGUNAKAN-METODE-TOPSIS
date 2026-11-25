@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPK Pemilihan Smartphone Mahasiswa — Metode TOPSIS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Custom scrollbar & smooth transitions */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3.5 gap-3">
+        <!-- Brand / Title -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                SPK Pemilihan Smartphone Mahasiswa
+              </h1>
+              <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                TOPSIS
+              </span>
+            </div>
+            <p class="text-xs text-slate-500">
+              Database: <span class="font-mono text-slate-700">spk_topsis_smartphone</span> • Dataset &amp; Simulasi UAS
+            </p>
+          </div>
+        </div>
+
+        <!-- Primary Navigation Tabs -->
+        <nav class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0" aria-label="Navigasi Utama">
+          <button
+            type="button"
+            data-tab="dashboard"
+            onclick="switchTab('dashboard')"
+            class="nav-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Dashboard Peringkat
+          </button>
+
+          <button
+            type="button"
+            data-tab="alternatif"
+            onclick="switchTab('alternatif')"
+            class="nav-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            Data Smartphone
+          </button>
+
+          <button
+            type="button"
+            data-tab="perhitungan"
+            onclick="switchTab('perhitungan')"
+            class="nav-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Langkah TOPSIS
+          </button>
+
+          <button
+            type="button"
+            data-tab="database"
+            onclick="switchTab('database')"
+            class="nav-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+            Skema &amp; SQL DDL
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: DASHBOARD PERINGKAT & SIMULASI BOBOT                            -->
+    <!-- ===================================================================== -->
+    <section id="tab-dashboard" class="tab-panel space-y-6">
+      <!-- Top Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Rekomendasi Utama (#1)</span>
+            <span class="px-2 py-0.5 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Terbaik
+            </span>
+          </div>
+          <p id="kpiTopName" class="text-lg font-bold text-slate-900 mt-2 truncate">-</p>
+          <p id="kpiTopScore" class="text-xs text-slate-500 mt-0.5 tabular-nums">Nilai Preferensi (Vi): -</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Jumlah Alternatif</span>
+            <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Aktif</span>
+          </div>
+          <p id="kpiAltCount" class="text-2xl font-extrabold text-slate-900 mt-1.5 tabular-nums">0</p>
+          <p class="text-xs text-slate-500 mt-0.5">Alternatif smartphone dievaluasi</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Bobot Kriteria</span>
+            <span id="kpiWeightBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full">-</span>
+          </div>
+          <p id="kpiWeightSum" class="text-2xl font-extrabold text-slate-900 mt-1.5 tabular-nums">1.00</p>
+          <p class="text-xs text-slate-500 mt-0.5">5 Kriteria (1 Cost, 4 Benefit)</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Metode MCDM</span>
+            <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Euclidean</span>
+          </div>
+          <p class="text-lg font-bold text-slate-900 mt-2">TOPSIS</p>
+          <p class="text-xs text-slate-500 mt-0.5">Jarak ke Solusi Ideal Positif &amp; Negatif</p>
+        </div>
+      </div>
+
+      <!-- Weight Simulation Panel -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Pengaturan &amp; Simulasi Bobot Kriteria Real-Time</h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              Geser slider atau ketik nilai bobot untuk mensimulasikan perubahan peringkat secara langsung. Total ideal bobot adalah <span class="font-semibold text-slate-700">1.00</span>.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onclick="normalizeWeights()"
+              class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition cursor-pointer flex items-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Normalisasi Bobot Otomatis
+            </button>
+            <button
+              type="button"
+              onclick="resetWeightsDefault()"
+              class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer"
+            >
+              Reset Default
+            </button>
+          </div>
+        </div>
+
+        <!-- Criteria Sliders Grid -->
+        <div id="criteriaSlidersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-4"></div>
+
+        <!-- Total Weight Status Bar -->
+        <div id="weightStatusBanner" class="mt-4 px-4 py-2.5 rounded-xl text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border"></div>
+      </div>
+
+      <!-- Top 3 Podium Highlights -->
+      <div id="topThreeCards" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+      <!-- Full Ranking Table -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Tabel Hasil Pemeringkatan TOPSIS</h2>
+            <p class="text-xs text-slate-500">
+              Diurutkan berdasarkan Nilai Preferensi (<span class="font-mono">Vi = Di- / (Di- + Di+)</span>) tertinggi ke terendah.
+            </p>
+          </div>
+          <div class="relative w-full sm:w-64">
+            <input
+              type="text"
+              id="rankingSearchInput"
+              oninput="renderRankingTable()"
+              placeholder="Cari kode atau nama HP..."
+              class="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <th class="py-3 px-4 text-center">Rank</th>
+                <th class="py-3 px-4">Kode</th>
+                <th class="py-3 px-4">Alternatif Smartphone</th>
+                <th class="py-3 px-4 text-right">Harga (C1)</th>
+                <th class="py-3 px-4 text-center">RAM (C2)</th>
+                <th class="py-3 px-4 text-center">Storage (C3)</th>
+                <th class="py-3 px-4 text-center">Baterai (C4)</th>
+                <th class="py-3 px-4 text-center">AnTuTu (C5)</th>
+                <th class="py-3 px-4 text-right">Jarak D+</th>
+                <th class="py-3 px-4 text-right">Jarak D-</th>
+                <th class="py-3 px-4 text-right">Nilai Vi</th>
+              </tr>
+            </thead>
+            <tbody id="rankingTableBody" class="divide-y divide-slate-100 text-xs sm:text-sm tabular-nums"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: MANAJEMEN ALTERNATIF SMARTPHONE (CRUD)                         -->
+    <!-- ===================================================================== -->
+    <section id="tab-alternatif" class="tab-panel hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Manajemen Data Alternatif Smartphone</h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              Kelola data alternatif (<span class="font-mono">A1-A20</span>). Setiap penambahan, pengubahan, atau penghapusan otomatis memperbarui perhitungan TOPSIS.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onclick="openPhoneModal()"
+              class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition cursor-pointer flex items-center gap-1.5"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Tambah Smartphone
+            </button>
+            <button
+              type="button"
+              onclick="resetPhonesDefault()"
+              class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition cursor-pointer flex items-center gap-1.5"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset 20 Data Bawaan
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="relative w-full sm:w-80">
+            <input
+              type="text"
+              id="phoneSearchInput"
+              oninput="renderPhonesTable()"
+              placeholder="Cari kode atau nama smartphone..."
+              class="w-full pl-9 pr-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <span id="phoneCountLabel" class="text-xs font-medium text-slate-500 tabular-nums">Menampilkan 0 data</span>
+        </div>
+
+        <!-- CRUD Table -->
+        <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <th class="py-3 px-4">Kode</th>
+                <th class="py-3 px-4">Nama Alternatif</th>
+                <th class="py-3 px-4 text-right">C1: Harga (Rp)</th>
+                <th class="py-3 px-4 text-center">C2: RAM</th>
+                <th class="py-3 px-4 text-center">C3: Storage</th>
+                <th class="py-3 px-4 text-center">C4: Baterai</th>
+                <th class="py-3 px-4 text-center">C5: AnTuTu (k)</th>
+                <th class="py-3 px-4 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="phonesCrudTableBody" class="divide-y divide-slate-100 text-xs sm:text-sm tabular-nums"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: RINCIAN LANGKAH PERHITUNGAN TOPSIS                             -->
+    <!-- ===================================================================== -->
+    <section id="tab-perhitungan" class="tab-panel hidden space-y-4">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900">Rincian Tahapan Algoritma TOPSIS</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+          Klik masing-masing langkah di bawah ini untuk membuka atau menutup detail matriks dan rumus perhitungan secara interaktif.
+        </p>
+      </div>
+
+      <!-- Step 1: Matriks Keputusan X & Pembagi -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onclick="toggleStepAccordion('step1')"
+          class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center">1</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Langkah 1 — Matriks Keputusan (X) &amp; Nilai Pembagi</h3>
+              <p class="text-xs text-slate-500">Nilai kriteria mentah alternatif dan akar jumlah kuadrat (√Σxᵢⱼ²) tiap kriteria</p>
+            </div>
+          </div>
+          <svg id="icon-step1" class="w-5 h-5 text-slate-400 transition-transform rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="content-step1" class="px-5 pb-5 border-t border-slate-100 pt-4 space-y-4">
+          <div id="divisorsSummary" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5"></div>
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm tabular-nums">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+                  <th class="py-2.5 px-3">Alternatif</th>
+                  <th class="py-2.5 px-3 text-right">x₁ (Harga)</th>
+                  <th class="py-2.5 px-3 text-center">x₂ (RAM)</th>
+                  <th class="py-2.5 px-3 text-center">x₃ (Storage)</th>
+                  <th class="py-2.5 px-3 text-center">x₄ (Baterai)</th>
+                  <th class="py-2.5 px-3 text-center">x₅ (AnTuTu)</th>
+                </tr>
+              </thead>
+              <tbody id="step1MatrixBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Matriks Ternormalisasi R -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onclick="toggleStepAccordion('step2')"
+          class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center">2</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Langkah 2 — Matriks Ternormalisasi (R)</h3>
+              <p class="text-xs text-slate-500">Rumus: rᵢⱼ = xᵢⱼ / √(Σxᵢⱼ²)</p>
+            </div>
+          </div>
+          <svg id="icon-step2" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="content-step2" class="hidden px-5 pb-5 border-t border-slate-100 pt-4">
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm tabular-nums">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+                  <th class="py-2.5 px-3">Alternatif</th>
+                  <th class="py-2.5 px-3 text-right">r₁ (Cost)</th>
+                  <th class="py-2.5 px-3 text-right">r₂ (Benefit)</th>
+                  <th class="py-2.5 px-3 text-right">r₃ (Benefit)</th>
+                  <th class="py-2.5 px-3 text-right">r₄ (Benefit)</th>
+                  <th class="py-2.5 px-3 text-right">r₅ (Benefit)</th>
+                </tr>
+              </thead>
+              <tbody id="step2MatrixBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Matriks Terbobot Y -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onclick="toggleStepAccordion('step3')"
+          class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center">3</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Langkah 3 — Matriks Keputusan Ternormalisasi Terbobot (Y)</h3>
+              <p class="text-xs text-slate-500">Rumus: yᵢⱼ = wⱼ × rᵢⱼ</p>
+            </div>
+          </div>
+          <svg id="icon-step3" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="content-step3" class="hidden px-5 pb-5 border-t border-slate-100 pt-4">
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm tabular-nums">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+                  <th class="py-2.5 px-3">Alternatif</th>
+                  <th class="py-2.5 px-3 text-right">y₁ (Cost)</th>
+                  <th class="py-2.5 px-3 text-right">y₂ (Benefit)</th>
+                  <th class="py-2.5 px-3 text-right">y₃ (Benefit)</th>
+                  <th class="py-2.5 px-3 text-right">y₄ (Benefit)</th>
+                  <th class="py-2.5 px-3 text-right">y₅ (Benefit)</th>
+                </tr>
+              </thead>
+              <tbody id="step3MatrixBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Solusi Ideal Positif (A+) & Negatif (A-) -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onclick="toggleStepAccordion('step4')"
+          class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center">4</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Langkah 4 — Solusi Ideal Positif (A⁺) &amp; Solusi Ideal Negatif (A⁻)</h3>
+              <p class="text-xs text-slate-500">Atribut Cost: A⁺ = min(y), A⁻ = max(y) • Atribut Benefit: A⁺ = max(y), A⁻ = min(y)</p>
+            </div>
+          </div>
+          <svg id="icon-step4" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="content-step4" class="hidden px-5 pb-5 border-t border-slate-100 pt-4">
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm tabular-nums">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+                  <th class="py-2.5 px-3">Solusi Ideal</th>
+                  <th class="py-2.5 px-3 text-right">C1 (Harga)</th>
+                  <th class="py-2.5 px-3 text-right">C2 (RAM)</th>
+                  <th class="py-2.5 px-3 text-right">C3 (Storage)</th>
+                  <th class="py-2.5 px-3 text-right">C4 (Baterai)</th>
+                  <th class="py-2.5 px-3 text-right">C5 (AnTuTu)</th>
+                </tr>
+              </thead>
+              <tbody id="step4IdealBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Jarak Euclidean (D+, D-) & Preferensi (Vi) -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onclick="toggleStepAccordion('step5')"
+          class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition cursor-pointer"
+        >
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center">5</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Langkah 5 — Jarak Euclidean (D⁺, D⁻) &amp; Nilai Preferensi (Vᵢ)</h3>
+              <p class="text-xs text-slate-500">D⁺ = √Σ(yᵢⱼ − yⱼ⁺)², D⁻ = √Σ(yᵢⱼ − yⱼ⁻)², Vᵢ = D⁻ / (D⁻ + D⁺)</p>
+            </div>
+          </div>
+          <svg id="icon-step5" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="content-step5" class="hidden px-5 pb-5 border-t border-slate-100 pt-4">
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm tabular-nums">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+                  <th class="py-2.5 px-3">Alternatif</th>
+                  <th class="py-2.5 px-3 text-right">D⁺ (Jarak Ideal +)</th>
+                  <th class="py-2.5 px-3 text-right">D⁻ (Jarak Ideal −)</th>
+                  <th class="py-2.5 px-3 text-right">Nilai Preferensi (Vᵢ)</th>
+                  <th class="py-2.5 px-3 text-center">Peringkat</th>
+                </tr>
+              </thead>
+              <tbody id="step5DistancesBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 4: SKEMA DATABASE & SQL DDL                                       -->
+    <!-- ===================================================================== -->
+    <section id="tab-database" class="tab-panel hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Skema Database &amp; SQL DDL (<span class="font-mono text-indigo-700">spk_topsis_smartphone</span>)</h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              Struktur 5 tabel relasional (<span class="font-mono">mahasiswa</span>, <span class="font-mono">smartphone</span>, <span class="font-mono">kriteria</span>, <span class="font-mono">penilaian</span>, <span class="font-mono">hasil_topsis</span>) siap disalin untuk dokumentasi UAS.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="copySqlScript()"
+              class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition cursor-pointer flex items-center gap-1.5"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Salin SQL DDL
+            </button>
+            <button
+              type="button"
+              onclick="openSqlModal()"
+              class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer"
+            >
+              Buka Modal SQL
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Tables Schema Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+          <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-sm font-bold text-indigo-700">mahasiswa</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">Entitas Penguji</span>
+            </div>
+            <ul class="text-xs space-y-1 text-slate-700 font-mono">
+              <li>• id_mahasiswa <span class="text-amber-700 font-semibold">[PK, AI]</span></li>
+              <li>• nama VARCHAR(100)</li>
+              <li>• nim VARCHAR(20) UNIQUE</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-sm font-bold text-indigo-700">smartphone</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">Alternatif (1:N / 1:1)</span>
+            </div>
+            <ul class="text-xs space-y-1 text-slate-700 font-mono">
+              <li>• id_smartphone <span class="text-amber-700 font-semibold">[PK, AI]</span></li>
+              <li>• kode_alternatif, nama_alternatif</li>
+              <li>• harga, ram, storage, baterai, antutu</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-sm font-bold text-indigo-700">kriteria</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">Bobot &amp; Jenis</span>
+            </div>
+            <ul class="text-xs space-y-1 text-slate-700 font-mono">
+              <li>• id_kriteria <span class="text-amber-700 font-semibold">[PK, AI]</span></li>
+              <li>• kode_kriteria UNIQUE</li>
+              <li>• nama_kriteria, bobot, jenis</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/60">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-sm font-bold text-indigo-700">penilaian</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">Relasi M:N</span>
+            </div>
+            <ul class="text-xs space-y-1 text-slate-700 font-mono">
+              <li>• id_penilaian <span class="text-amber-700 font-semibold">[PK, AI]</span></li>
+              <li>• id_smartphone <span class="text-emerald-700 font-semibold">[FK]</span></li>
+              <li>• id_kriteria <span class="text-emerald-700 font-semibold">[FK]</span></li>
+              <li>• nilai_mentah DECIMAL(12,4)</li>
+            </ul>
+          </div>
+
+          <div class="rounded-xl border border-slate-200 p-4 bg-slate-50/60 md:col-span-2 lg:col-span-2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-sm font-bold text-indigo-700">hasil_topsis</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">Output TOPSIS (1:1)</span>
+            </div>
+            <ul class="text-xs space-y-1 text-slate-700 font-mono">
+              <li>• id_hasil <span class="text-amber-700 font-semibold">[PK, AI]</span> • id_smartphone <span class="text-emerald-700 font-semibold">[FK, UNIQUE]</span></li>
+              <li>• jarak_positif (D+) • jarak_negatif (D-) • nilai_preferensi (Vi) • ranking</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- SQL Code Block -->
+        <div class="mt-5">
+          <pre id="sqlCodeBlock" class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-x-auto leading-relaxed max-h-96"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <span>Sistem Pendukung Keputusan (SPK) — Metode TOPSIS Pemilihan Smartphone Mahasiswa</span>
+      <span>Program Studi Teknik Informatika • Project UAS</span>
+    </div>
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL TAMBAH / EDIT SMARTPHONE                                       -->
+  <!-- ===================================================================== -->
+  <div id="phoneModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-lg overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 id="phoneModalTitle" class="text-base font-bold text-slate-900">Tambah Alternatif Smartphone</h3>
+        <button type="button" onclick="closePhoneModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="phoneForm" onsubmit="savePhone(event)" class="p-5 space-y-4 text-sm">
+        <input type="hidden" id="phoneEditId" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label for="phoneKode" class="block text-xs font-semibold text-slate-700 mb-1">Kode Alternatif</label>
+            <input
+              type="text"
+              id="phoneKode"
+              required
+              placeholder="A21"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+            />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="phoneNama" class="block text-xs font-semibold text-slate-700 mb-1">Nama Smartphone</label>
+            <input
+              type="text"
+              id="phoneNama"
+              required
+              placeholder="Contoh: Infinix GT 20 Pro"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="phoneHarga" class="block text-xs font-semibold text-slate-700 mb-1">C1: Harga (Rp) [Cost]</label>
+            <input
+              type="number"
+              id="phoneHarga"
+              required
+              min="100000"
+              step="1000"
+              placeholder="2999000"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 tabular-nums"
+            />
+          </div>
+          <div>
+            <label for="phoneRam" class="block text-xs font-semibold text-slate-700 mb-1">C2: RAM (GB) [Benefit]</label>
+            <input
+              type="number"
+              id="phoneRam"
+              required
+              min="1"
+              max="64"
+              step="1"
+              placeholder="8"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 tabular-nums"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label for="phoneStorage" class="block text-xs font-semibold text-slate-700 mb-1">C3: Storage (GB)</label>
+            <input
+              type="number"
+              id="phoneStorage"
+              required
+              min="8"
+              max="2048"
+              step="1"
+              placeholder="256"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 tabular-nums"
+            />
+          </div>
+          <div>
+            <label for="phoneBaterai" class="block text-xs font-semibold text-slate-700 mb-1">C4: Baterai (mAh)</label>
+            <input
+              type="number"
+              id="phoneBaterai"
+              required
+              min="1000"
+              max="20000"
+              step="50"
+              placeholder="5000"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 tabular-nums"
+            />
+          </div>
+          <div>
+            <label for="phoneAntutu" class="block text-xs font-semibold text-slate-700 mb-1">C5: AnTuTu (ribuan)</label>
+            <input
+              type="number"
+              id="phoneAntutu"
+              required
+              min="10"
+              max="5000"
+              step="1"
+              placeholder="550"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 tabular-nums"
+            />
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onclick="closePhoneModal()"
+            class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs cursor-pointer"
+          >
+            Simpan Data
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL SQL DDL                                                         -->
+  <!-- ===================================================================== -->
+  <div id="sqlModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-3xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-slate-900">SQL DDL — Database <span class="font-mono text-indigo-700">spk_topsis_smartphone</span></h3>
+          <p class="text-xs text-slate-500">Salin skrip SQL untuk pembuatan tabel &amp; relasi di MySQL / MariaDB</p>
+        </div>
+        <button type="button" onclick="closeSqlModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-5">
+        <pre id="modalSqlCodeBlock" class="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs font-mono overflow-auto max-h-[60vh] leading-relaxed"></pre>
+        <div class="mt-4 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onclick="copySqlScript()"
+            class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
+          >
+            Salin ke Clipboard
+          </button>
+          <button
+            type="button"
+            onclick="closeSqlModal()"
+            class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT LOGIC: DATA, TOPSIS ENGINE, CRUD & UI RENDERERS             -->
+  <!-- ===================================================================== -->
+  <script>
+    // Default 20 Smartphone Dataset (Selaras dengan spk_topsis_smartphone)
+    const DEFAULT_PHONES = [
+      { id: 1,  kode: 'A1',  nama: 'Redmi Note 13 4G',       harga: 2499000, ram: 8,  storage: 128, baterai: 5000, antutu: 320 },
+      { id: 2,  kode: 'A2',  nama: 'Redmi Note 13 Pro 5G',   harga: 4399000, ram: 8,  storage: 256, baterai: 5100, antutu: 605 },
+      { id: 3,  kode: 'A3',  nama: 'Poco M6 Pro',            harga: 2999000, ram: 8,  storage: 256, baterai: 5000, antutu: 415 },
+      { id: 4,  kode: 'A4',  nama: 'Poco X6 5G',             harga: 3799000, ram: 12, storage: 256, baterai: 5100, antutu: 600 },
+      { id: 5,  kode: 'A5',  nama: 'Samsung Galaxy A05s',    harga: 2199000, ram: 6,  storage: 128, baterai: 5000, antutu: 310 },
+      { id: 6,  kode: 'A6',  nama: 'Samsung Galaxy A15 5G',  harga: 3399000, ram: 8,  storage: 256, baterai: 5000, antutu: 405 },
+      { id: 7,  kode: 'A7',  nama: 'Samsung Galaxy A25 5G',  harga: 3999000, ram: 8,  storage: 256, baterai: 5000, antutu: 480 },
+      { id: 8,  kode: 'A8',  nama: 'Infinix Note 40',        harga: 2799000, ram: 8,  storage: 256, baterai: 5000, antutu: 420 },
+      { id: 9,  kode: 'A9',  nama: 'Infinix Note 40 Pro 5G', harga: 3499000, ram: 8,  storage: 256, baterai: 5000, antutu: 450 },
+      { id: 10, kode: 'A10', nama: 'Tecno Pova 6',           harga: 2799000, ram: 8,  storage: 256, baterai: 6000, antutu: 425 },
+      { id: 11, kode: 'A11', nama: 'Tecno Camon 20 Pro 5G',  harga: 3199000, ram: 8,  storage: 256, baterai: 5000, antutu: 680 },
+      { id: 12, kode: 'A12', nama: 'iQOO Z9 5G',             harga: 4299000, ram: 8,  storage: 256, baterai: 6000, antutu: 815 },
+      { id: 13, kode: 'A13', nama: 'iQOO Z9x 5G',            harga: 2999000, ram: 8,  storage: 128, baterai: 6000, antutu: 515 },
+      { id: 14, kode: 'A14', nama: 'Realme 12+ 5G',          harga: 4199000, ram: 8,  storage: 256, baterai: 5000, antutu: 580 },
+      { id: 15, kode: 'A15', nama: 'Realme C67',             harga: 2399000, ram: 8,  storage: 128, baterai: 5000, antutu: 315 },
+      { id: 16, kode: 'A16', nama: 'Vivo Y28',               harga: 2399000, ram: 8,  storage: 128, baterai: 6000, antutu: 275 },
+      { id: 17, kode: 'A17', nama: 'Vivo V30e',              harga: 4699000, ram: 8,  storage: 256, baterai: 5500, antutu: 520 },
+      { id: 18, kode: 'A18', nama: 'Oppo A60',               harga: 2599000, ram: 8,  storage: 128, baterai: 5000, antutu: 310 },
+      { id: 19, kode: 'A19', nama: 'Oppo Reno11 F 5G',       harga: 4599000, ram: 8,  storage: 256, baterai: 5000, antutu: 595 },
+      { id: 20, kode: 'A20', nama: 'Itel RS4',               harga: 1999000, ram: 12, storage: 256, baterai: 5000, antutu: 410 },
+    ];
+
+    // Default 5 Criteria
+    const DEFAULT_CRITERIA = [
+      { id: 'C1', kode: 'C1', nama: 'Harga',   satuan: 'Rp',     jenis: 'Cost',    bobot: 0.30 },
+      { id: 'C2', kode: 'C2', nama: 'RAM',     satuan: 'GB',     jenis: 'Benefit', bobot: 0.20 },
+      { id: 'C3', kode: 'C3', nama: 'Storage', satuan: 'GB',     jenis: 'Benefit', bobot: 0.15 },
+      { id: 'C4', kode: 'C4', nama: 'Baterai', satuan: 'mAh',    jenis: 'Benefit', bobot: 0.15 },
+      { id: 'C5', kode: 'C5', nama: 'AnTuTu',  satuan: 'x1000',  jenis: 'Benefit', bobot: 0.20 },
+    ];
+
+    // Application State
+    let phones = DEFAULT_PHONES.map(p => ({ ...p }));
+    let criteria = DEFAULT_CRITERIA.map(c => ({ ...c }));
+    let activeTab = 'dashboard';
+
+    // Toast Notification Helper
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colorMap = {
+        success: 'bg-emerald-900 text-white border-emerald-700',
+        warning: 'bg-amber-900 text-white border-amber-700',
+        error: 'bg-rose-900 text-white border-rose-700',
+        info: 'bg-slate-900 text-white border-slate-700',
+      };
+      toast.className = `px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-medium transition-all ${colorMap[type] || colorMap.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 250);
+      }, 2800);
+    }
+
+    // Format Rupiah
+    function formatRupiah(num) {
+      return 'Rp' + Number(num).toLocaleString('id-ID');
+    }
+
+    // Tab Navigation Switcher
+    function switchTab(tabName) {
+      activeTab = tabName;
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('hidden', panel.id !== `tab-${tabName}`);
+      });
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        const isActive = btn.dataset.tab === tabName;
+        btn.className = `nav-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+          isActive
+            ? 'bg-indigo-600 text-white shadow-xs'
+            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+        }`;
+      });
+      if (tabName === 'alternatif') renderPhonesTable();
+      if (tabName === 'database') renderSqlSection();
+    }
+
+    // Accordion Toggle for TOPSIS Calculation Steps
+    function toggleStepAccordion(stepKey) {
+      const content = document.getElementById(`content-${stepKey}`);
+      const icon = document.getElementById(`icon-${stepKey}`);
+      const isHidden = content.classList.contains('hidden');
+      content.classList.toggle('hidden', !isHidden);
+      icon.classList.toggle('rotate-180', isHidden);
+    }
+
+    // Core TOPSIS Engine
+    function calculateTOPSIS() {
+      if (phones.length === 0) {
+        return {
+          divisors: [0, 0, 0, 0, 0],
+          matrixX: [],
+          matrixR: [],
+          matrixY: [],
+          aPlus: [0, 0, 0, 0, 0],
+          aMinus: [0, 0, 0, 0, 0],
+          results: [],
+        };
+      }
+
+      // Step 1: Decision Matrix X (m x 5)
+      const matrixX = phones.map(p => [
+        Number(p.harga),
+        Number(p.ram),
+        Number(p.storage),
+        Number(p.baterai),
+        Number(p.antutu),
+      ]);
+
+      // Divisors: sqrt(sum(x_ij^2)) for each criterion j
+      const divisors = [0, 1, 2, 3, 4].map(j => {
+        const sumSq = matrixX.reduce((acc, row) => acc + Math.pow(row[j], 2), 0);
+        return Math.sqrt(sumSq) || 1;
+      });
+
+      // Step 2: Normalized Matrix R
+      const matrixR = matrixX.map(row =>
+        row.map((val, j) => val / divisors[j])
+      );
+
+      // Step 3: Weighted Normalized Matrix Y
+      const weights = criteria.map(c => Number(c.bobot) || 0);
+      const matrixY = matrixR.map(row =>
+        row.map((rVal, j) => rVal * weights[j])
+      );
+
+      // Step 4: Positive Ideal Solution (A+) and Negative Ideal Solution (A-)
+      const aPlus = [0, 1, 2, 3, 4].map(j => {
+        const col = matrixY.map(row => row[j]);
+        return criteria[j].jenis === 'Cost' ? Math.min(...col) : Math.max(...col);
+      });
+
+      const aMinus = [0, 1, 2, 3, 4].map(j => {
+        const col = matrixY.map(row => row[j]);
+        return criteria[j].jenis === 'Cost' ? Math.max(...col) : Math.min(...col);
+      });
+
+      // Step 5 & 6: Euclidean Distances (D+, D-) & Preference Score (Vi)
+      const rawResults = phones.map((phone, i) => {
+        const yRow = matrixY[i];
+        const sumSqPlus = yRow.reduce((acc, yVal, j) => acc + Math.pow(yVal - aPlus[j], 2), 0);
+        const sumSqMinus = yRow.reduce((acc, yVal, j) => acc + Math.pow(yVal - aMinus[j], 2), 0);
+        const dPlus = Math.sqrt(sumSqPlus);
+        const dMinus = Math.sqrt(sumSqMinus);
+        const denom = dPlus + dMinus;
+        const vi = denom === 0 ? 0 : dMinus / denom;
+
+        return {
+          phone,
+          index: i,
+          x: matrixX[i],
+          r: matrixR[i],
+          y: yRow,
+          dPlus,
+          dMinus,
+          vi,
+        };
+      });
+
+      // Sort descending by Vi and assign rank
+      const sorted = [...rawResults].sort((a, b) => b.vi - a.vi);
+      sorted.forEach((item, idx) => {
+        item.ranking = idx + 1;
+      });
+
+      return {
+        divisors,
+        matrixX,
+        matrixR,
+        matrixY,
+        aPlus,
+        aMinus,
+        results: sorted,
+        byOriginalIndex: rawResults,
+      };
+    }
+
+    // Weight Simulation Handlers
+    function updateWeightFromSlider(idx, val) {
+      const parsed = Math.max(0, Math.min(1, parseFloat(val) || 0));
+      criteria[idx].bobot = Number(parsed.toFixed(2));
+      const numInput = document.getElementById(`weight-num-${idx}`);
+      const valLabel = document.getElementById(`weight-val-${idx}`);
+      if (numInput) numInput.value = criteria[idx].bobot.toFixed(2);
+      if (valLabel) valLabel.textContent = criteria[idx].bobot.toFixed(2);
+      refreshAll();
+    }
+
+    function updateWeightFromInput(idx, val) {
+      let parsed = parseFloat(val);
+      if (Number.isNaN(parsed)) parsed = 0;
+      parsed = Math.max(0, Math.min(1, parsed));
+      criteria[idx].bobot = Number(parsed.toFixed(4));
+      const slider = document.getElementById(`weight-slider-${idx}`);
+      const valLabel = document.getElementById(`weight-val-${idx}`);
+      if (slider) slider.value = Math.min(1, criteria[idx].bobot);
+      if (valLabel) valLabel.textContent = criteria[idx].bobot.toFixed(2);
+      refreshAll();
+    }
+
+    function normalizeWeights() {
+      const total = criteria.reduce((sum, c) => sum + (Number(c.bobot) || 0), 0);
+      if (total <= 0) {
+        resetWeightsDefault();
+        showToast('Total bobot 0, dikembalikan ke bobot default.', 'warning');
+        return;
+      }
+      let running = 0;
+      criteria.forEach((c, idx) => {
+        if (idx < criteria.length - 1) {
+          const norm = Number(((c.bobot / total)).toFixed(2));
+          c.bobot = norm;
+          running += norm;
+        } else {
+          c.bobot = Number(Math.max(0, 1 - running).toFixed(2));
+        }
+      });
+      renderCriteriaSliders();
+      refreshAll();
+      showToast('Bobot berhasil dinormalisasi sehingga total = 1.00', 'success');
+    }
+
+    function resetWeightsDefault() {
+      criteria = DEFAULT_CRITERIA.map(c => ({ ...c }));
+      renderCriteriaSliders();
+      refreshAll();
+      showToast('Bobot kriteria dikembalikan ke nilai default.', 'info');
+    }
+
+    function renderCriteriaSliders() {
+      const container = document.getElementById('criteriaSlidersContainer');
+      container.innerHTML = criteria.map((c, idx) => {
+        const badgeClass = c.jenis === 'Cost'
+          ? 'bg-rose-50 text-rose-700 border-rose-200'
+          : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return `
+          <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between gap-2.5">
+            <div>
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-xs font-bold text-slate-900">${c.kode}: ${c.nama}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass}">${c.jenis}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">Satuan: ${c.satuan}</p>
+            </div>
+
+            <input
+              id="weight-slider-${idx}"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value="${Math.min(1, c.bobot)}"
+              oninput="updateWeightFromSlider(${idx}, this.value)"
+              class="w-full accent-indigo-600 cursor-pointer"
+            />
+
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] text-slate-500">Bobot:</span>
+              <div class="flex items-center gap-1">
+                <input
+                  id="weight-num-${idx}"
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value="${Number(c.bobot).toFixed(2)}"
+                  onchange="updateWeightFromInput(${idx}, this.value)"
+                  class="w-20 px-2 py-1 text-right text-xs font-bold rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 tabular-nums"
+                />
+                <span id="weight-val-${idx}" class="hidden">${Number(c.bobot).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Dashboard KPIs, Weight Banner, Top 3 & Ranking Table
+    function renderDashboard(topsisData) {
+      const totalWeight = criteria.reduce((sum, c) => sum + (Number(c.bobot) || 0), 0);
+      const isBalanced = Math.abs(totalWeight - 1) <= 0.005;
+
+      // KPIs
+      const top1 = topsisData.results[0];
+      document.getElementById('kpiTopName').textContent = top1 ? `${top1.phone.kode} • ${top1.phone.nama}` : '-';
+      document.getElementById('kpiTopScore').textContent = top1
+        ? `Nilai Preferensi (Vi): ${top1.vi.toFixed(4)} • Rank #1`
+        : 'Tidak ada data';
+      document.getElementById('kpiAltCount').textContent = phones.length;
+      document.getElementById('kpiWeightSum').textContent = totalWeight.toFixed(2);
+
+      const kpiBadge = document.getElementById('kpiWeightBadge');
+      kpiBadge.textContent = isBalanced ? 'Ideal (1.00)' : 'Perlu Normalisasi';
+      kpiBadge.className = `text-xs font-semibold px-2 py-0.5 rounded-full border ${
+        isBalanced
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+          : 'bg-amber-50 text-amber-700 border-amber-200'
+      }`;
+
+      // Weight Status Banner
+      const banner = document.getElementById('weightStatusBanner');
+      if (isBalanced) {
+        banner.className = 'mt-4 px-4 py-2.5 rounded-xl text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border bg-emerald-50/70 border-emerald-200 text-emerald-900';
+        banner.innerHTML = `
+          <span><strong>Total Bobot = ${totalWeight.toFixed(2)}</strong> — Bobot kriteria sudah seimbang (100%).</span>
+          <span class="text-xs font-medium text-emerald-700">Perhitungan TOPSIS aktif secara real-time</span>
+        `;
+      } else {
+        banner.className = 'mt-4 px-4 py-2.5 rounded-xl text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border bg-amber-50 border-amber-200 text-amber-900';
+        banner.innerHTML = `
+          <span><strong>Perhatian: Total Bobot saat ini ${totalWeight.toFixed(2)}</strong> (tidak sama dengan 1.00).</span>
+          <button type="button" onclick="normalizeWeights()" class="underline font-bold text-amber-900 hover:text-amber-700 cursor-pointer text-left sm:text-right">
+            Klik untuk Normalisasi Otomatis ke 1.00
+          </button>
+        `;
+      }
+
+      // Top 3 Cards
+      const top3Container = document.getElementById('topThreeCards');
+      const medals = [
+        { label: 'Peringkat 1', ring: 'border-amber-300 bg-gradient-to-br from-amber-50/80 to-white', pill: 'bg-amber-100 text-amber-800 border-amber-300' },
+        { label: 'Peringkat 2', ring: 'border-slate-300 bg-gradient-to-br from-slate-100/70 to-white', pill: 'bg-slate-200 text-slate-800 border-slate-300' },
+        { label: 'Peringkat 3', ring: 'border-orange-200 bg-gradient-to-br from-orange-50/60 to-white', pill: 'bg-orange-100 text-orange-800 border-orange-200' },
+      ];
+
+      top3Container.innerHTML = topsisData.results.slice(0, 3).map((item, idx) => {
+        const m = medals[idx];
+        return `
+          <div class="rounded-2xl border p-4 shadow-xs ${m.ring}">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full border ${m.pill}">${m.label}</span>
+              <span class="font-mono text-xs font-bold text-slate-500">${item.phone.kode}</span>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900 mt-2.5">${item.phone.nama}</h3>
+            <p class="text-xs text-slate-600 mt-1 tabular-nums">
+              ${formatRupiah(item.phone.harga)} • ${item.phone.ram}GB/${item.phone.storage}GB • ${item.phone.baterai}mAh • AnTuTu ${item.phone.antutu}k
+            </p>
+            <div class="mt-3 pt-3 border-t border-slate-200/70 flex items-center justify-between text-xs tabular-nums">
+              <span class="text-slate-500">D⁺: <strong>${item.dPlus.toFixed(4)}</strong> | D⁻: <strong>${item.dMinus.toFixed(4)}</strong></span>
+              <span class="text-sm font-extrabold text-indigo-700">Vi = ${item.vi.toFixed(4)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      renderRankingTable(topsisData);
+    }
+
+    function renderRankingTable(cachedData = null) {
+      const data = cachedData || calculateTOPSIS();
+      const query = (document.getElementById('rankingSearchInput')?.value || '').trim().toLowerCase();
+      const tbody = document.getElementById('rankingTableBody');
+
+      const filtered = data.results.filter(item =>
+        item.phone.kode.toLowerCase().includes(query) ||
+        item.phone.nama.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="py-8 text-center text-slate-400">Tidak ada alternatif smartphone yang cocok.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        const isTop1 = item.ranking === 1;
+        const rankBadge = item.ranking === 1
+          ? 'bg-amber-400 text-slate-950 font-extrabold'
+          : item.ranking === 2
+          ? 'bg-slate-300 text-slate-900 font-bold'
+          : item.ranking === 3
+          ? 'bg-orange-300 text-slate-950 font-bold'
+          : 'bg-slate-100 text-slate-700 font-semibold';
+
+        return `
+          <tr class="${isTop1 ? 'bg-indigo-50/40' : 'hover:bg-slate-50/80'} transition-colors">
+            <td class="py-3 px-4 text-center">
+              <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs ${rankBadge}">${item.ranking}</span>
+            </td>
+            <td class="py-3 px-4 font-mono font-bold text-indigo-700">${item.phone.kode}</td>
+            <td class="py-3 px-4 font-semibold text-slate-900">${item.phone.nama}</td>
+            <td class="py-3 px-4 text-right text-slate-700">${formatRupiah(item.phone.harga)}</td>
+            <td class="py-3 px-4 text-center text-slate-700">${item.phone.ram} GB</td>
+            <td class="py-3 px-4 text-center text-slate-700">${item.phone.storage} GB</td>
+            <td class="py-3 px-4 text-center text-slate-700">${item.phone.baterai} mAh</td>
+            <td class="py-3 px-4 text-center text-slate-700">${item.phone.antutu}k</td>
+            <td class="py-3 px-4 text-right text-slate-600">${item.dPlus.toFixed(4)}</td>
+            <td class="py-3 px-4 text-right text-slate-600">${item.dMinus.toFixed(4)}</td>
+            <td class="py-3 px-4 text-right font-extrabold text-indigo-700">${item.vi.toFixed(4)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render CRUD Table for Smartphones
+    function renderPhonesTable() {
+      const query = (document.getElementById('phoneSearchInput')?.value || '').trim().toLowerCase();
+      const tbody = document.getElementById('phonesCrudTableBody');
+      const countLabel = document.getElementById('phoneCountLabel');
+
+      const filtered = phones.filter(p =>
+        p.kode.toLowerCase().includes(query) ||
+        p.nama.toLowerCase().includes(query)
+      );
+
+      countLabel.textContent = `Menampilkan ${filtered.length} dari ${phones.length} data smartphone`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Belum ada data smartphone. Klik "Tambah Smartphone" atau "Reset 20 Data Bawaan".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => `
+        <tr class="hover:bg-slate-50/80 transition-colors">
+          <td class="py-3 px-4 font-mono font-bold text-indigo-700">${p.kode}</td>
+          <td class="py-3 px-4 font-semibold text-slate-900">${p.nama}</td>
+          <td class="py-3 px-4 text-right text-slate-700">${formatRupiah(p.harga)}</td>
+          <td class="py-3 px-4 text-center text-slate-700">${p.ram} GB</td>
+          <td class="py-3 px-4 text-center text-slate-700">${p.storage} GB</td>
+          <td class="py-3 px-4 text-center text-slate-700">${p.baterai} mAh</td>
+          <td class="py-3 px-4 text-center text-slate-700">${p.antutu}k</td>
+          <td class="py-3 px-4 text-center">
+            <div class="inline-flex items-center gap-1.5">
+              <button
+                type="button"
+                onclick="openPhoneModal(${p.id})"
+                class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition cursor-pointer"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onclick="deletePhone(${p.id})"
+                class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 transition cursor-pointer"
+              >
+                Hapus
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Modal & CRUD Operations
+    function openPhoneModal(phoneId = null) {
+      const modal = document.getElementById('phoneModal');
+      const title = document.getElementById('phoneModalTitle');
+      document.getElementById('phoneForm').reset();
+
+      if (phoneId !== null) {
+        const target = phones.find(p => p.id === phoneId);
+        if (!target) return;
+        title.textContent = `Edit Smartphone (${target.kode})`;
+        document.getElementById('phoneEditId').value = target.id;
+        document.getElementById('phoneKode').value = target.kode;
+        document.getElementById('phoneNama').value = target.nama;
+        document.getElementById('phoneHarga').value = target.harga;
+        document.getElementById('phoneRam').value = target.ram;
+        document.getElementById('phoneStorage').value = target.storage;
+        document.getElementById('phoneBaterai').value = target.baterai;
+        document.getElementById('phoneAntutu').value = target.antutu;
+      } else {
+        title.textContent = 'Tambah Alternatif Smartphone';
+        document.getElementById('phoneEditId').value = '';
+        document.getElementById('phoneKode').value = `A${phones.length + 1}`;
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closePhoneModal() {
+      const modal = document.getElementById('phoneModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function savePhone(event) {
+      event.preventDefault();
+      const editId = document.getElementById('phoneEditId').value;
+      const kode = document.getElementById('phoneKode').value.trim().toUpperCase();
+      const nama = document.getElementById('phoneNama').value.trim();
+      const harga = Number(document.getElementById('phoneHarga').value);
+      const ram = Number(document.getElementById('phoneRam').value);
+      const storage = Number(document.getElementById('phoneStorage').value);
+      const baterai = Number(document.getElementById('phoneBaterai').value);
+      const antutu = Number(document.getElementById('phoneAntutu').value);
+
+      if (!kode || !nama) {
+        showToast('Kode dan nama smartphone wajib diisi.', 'warning');
+        return;
+      }
+
+      if (editId) {
+        const idx = phones.findIndex(p => p.id === Number(editId));
+        if (idx !== -1) {
+          phones[idx] = { ...phones[idx], kode, nama, harga, ram, storage, baterai, antutu };
+          showToast(`Data ${kode} (${nama}) berhasil diperbarui.`, 'success');
+        }
+      } else {
+        const nextId = phones.reduce((max, p) => Math.max(max, p.id), 0) + 1;
+        phones.push({ id: nextId, kode, nama, harga, ram, storage, baterai, antutu });
+        showToast(`Alternatif ${kode} (${nama}) berhasil ditambahkan.`, 'success');
+      }
+
+      closePhoneModal();
+      refreshAll();
+    }
+
+    function deletePhone(phoneId) {
+      const target = phones.find(p => p.id === phoneId);
+      if (!target) return;
+      phones = phones.filter(p => p.id !== phoneId);
+      refreshAll();
+      showToast(`Alternatif ${target.kode} (${target.nama}) dihapus.`, 'warning');
+    }
+
+    function resetPhonesDefault() {
+      phones = DEFAULT_PHONES.map(p => ({ ...p }));
+      refreshAll();
+      showToast('20 data smartphone bawaan berhasil dipulihkan.', 'success');
+    }
+
+    // Render Step-by-Step TOPSIS Tables
+    function renderSteps(topsisData) {
+      // Divisors summary
+      const divContainer = document.getElementById('divisorsSummary');
+      divContainer.innerHTML = criteria.map((c, j) => `
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+          <p class="text-[11px] font-bold text-slate-500">Pembagi ${c.kode} (${c.nama})</p>
+          <p class="text-sm font-extrabold text-slate-900 mt-0.5 tabular-nums">
+            ${j === 0 ? topsisData.divisors[j].toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : topsisData.divisors[j].toFixed(4)}
+          </p>
+        </div>
+      `).join('');
+
+      // Step 1: X
+      document.getElementById('step1MatrixBody').innerHTML = topsisData.byOriginalIndex.map(row => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2 px-3 font-semibold text-slate-900 whitespace-nowrap"><span class="font-mono text-indigo-700">${row.phone.kode}</span> • ${row.phone.nama}</td>
+          <td class="py-2 px-3 text-right">${formatRupiah(row.x[0])}</td>
+          <td class="py-2 px-3 text-center">${row.x[1]} GB</td>
+          <td class="py-2 px-3 text-center">${row.x[2]} GB</td>
+          <td class="py-2 px-3 text-center">${row.x[3]} mAh</td>
+          <td class="py-2 px-3 text-center">${row.x[4]}k</td>
+        </tr>
+      `).join('');
+
+      // Step 2: R
+      document.getElementById('step2MatrixBody').innerHTML = topsisData.byOriginalIndex.map(row => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2 px-3 font-semibold text-slate-900 whitespace-nowrap"><span class="font-mono text-indigo-700">${row.phone.kode}</span> • ${row.phone.nama}</td>
+          <td class="py-2 px-3 text-right">${row.r[0].toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${row.r[1].toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${row.r[2].toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${row.r[3].toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${row.r[4].toFixed(4)}</td>
+        </tr>
+      `).join('');
+
+      // Step 3: Y
+      document.getElementById('step3MatrixBody').innerHTML = topsisData.byOriginalIndex.map(row => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2 px-3 font-semibold text-slate-900 whitespace-nowrap"><span class="font-mono text-indigo-700">${row.phone.kode}</span> • ${row.phone.nama}</td>
+          <td class="py-2 px-3 text-right">${row.y[0].toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${row.y[1].toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${row.y[2].toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${row.y[3].toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${row.y[4].toFixed(4)}</td>
+        </tr>
+      `).join('');
+
+      // Step 4: A+ and A-
+      document.getElementById('step4IdealBody').innerHTML = `
+        <tr class="bg-emerald-50/50 font-semibold">
+          <td class="py-2.5 px-3 text-emerald-900">Solusi Ideal Positif (A⁺)</td>
+          <td class="py-2.5 px-3 text-right text-emerald-900">${topsisData.aPlus[0].toFixed(4)}</td>
+          <td class="py-2.5 px-3 text-right text-emerald-900">${topsisData.aPlus[1].toFixed(4)}</td>
+          <td class="py-2.5 px-3 text-right text-emerald-900">${topsisData.aPlus[2].toFixed(4)}</td>
+          <td class="py-2.5 px-3 text-right text-emerald-900">${topsisData.aPlus[3].toFixed(4)}</td>
+          <td class="py-2.5 px-3 text-right text-emerald-900">${topsisData.aPlus[4].toFixed(4)}</td>
+        </tr>
+        <tr class="bg-rose-50/50 font-semibold">
+          <td class="py-2.5 px-3 text-rose-900">Solusi Ideal Negatif (A⁻)</td>
+          <td class="py-2.5 px-3 text-right text-rose-900">${topsisData.aMinus[0].toFixed(4)}</td>
+          <td class="py-2.5 px-3 text-right text-rose-900">${topsisData.aMinus[1].toFixed(4)}</td>
+          <td class="py-2.5 px-3 text-right text-rose-900">${topsisData.aMinus[2].toFixed(4)}</td>
+          <td class="py-2.5 px-3 text-right text-rose-900">${topsisData.aMinus[3].toFixed(4)}</td>
+          <td class="py-2.5 px-3 text-right text-rose-900">${topsisData.aMinus[4].toFixed(4)}</td>
+        </tr>
+      `;
+
+      // Step 5: Distances & Vi (sorted by rank)
+      document.getElementById('step5DistancesBody').innerHTML = topsisData.results.map(item => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2 px-3 font-semibold text-slate-900 whitespace-nowrap"><span class="font-mono text-indigo-700">${item.phone.kode}</span> • ${item.phone.nama}</td>
+          <td class="py-2 px-3 text-right">${item.dPlus.toFixed(4)}</td>
+          <td class="py-2 px-3 text-right">${item.dMinus.toFixed(4)}</td>
+          <td class="py-2 px-3 text-right font-bold text-indigo-700">${item.vi.toFixed(4)}</td>
+          <td class="py-2 px-3 text-center font-bold">#${item.ranking}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Generate SQL DDL Script
+    function generateSqlDdl() {
+      return `-- Database: spk_topsis_smartphone
+CREATE DATABASE IF NOT EXISTS spk_topsis_smartphone;
+USE spk_topsis_smartphone;
+
+CREATE TABLE mahasiswa (
+    id_mahasiswa INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    nim VARCHAR(20) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE smartphone (
+    id_smartphone INT AUTO_INCREMENT PRIMARY KEY,
+    kode_alternatif VARCHAR(10) NOT NULL UNIQUE,
+    nama_alternatif VARCHAR(100) NOT NULL,
+    harga DECIMAL(12,2) NOT NULL,
+    ram INT NOT NULL,
+    storage INT NOT NULL,
+    baterai INT NOT NULL,
+    antutu INT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE kriteria (
+    id_kriteria INT AUTO_INCREMENT PRIMARY KEY,
+    kode_kriteria VARCHAR(10) NOT NULL UNIQUE,
+    nama_kriteria VARCHAR(50) NOT NULL,
+    bobot DECIMAL(4,2) NOT NULL,
+    jenis ENUM('Cost', 'Benefit') NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE penilaian (
+    id_penilaian INT AUTO_INCREMENT PRIMARY KEY,
+    id_smartphone INT NOT NULL,
+    id_kriteria INT NOT NULL,
+    nilai_mentah DECIMAL(12,4) NOT NULL,
+    UNIQUE KEY uq_smartphone_kriteria (id_smartphone, id_kriteria),
+    CONSTRAINT fk_penilaian_smartphone FOREIGN KEY (id_smartphone)
+        REFERENCES smartphone(id_smartphone) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_penilaian_kriteria FOREIGN KEY (id_kriteria)
+        REFERENCES kriteria(id_kriteria) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE hasil_topsis (
+    id_hasil INT AUTO_INCREMENT PRIMARY KEY,
+    id_smartphone INT NOT NULL UNIQUE,
+    jarak_positif DECIMAL(6,4) NOT NULL,
+    jarak_negatif DECIMAL(6,4) NOT NULL,
+    nilai_preferensi DECIMAL(6,4) NOT NULL,
+    ranking INT NOT NULL,
+    CONSTRAINT fk_hasil_smartphone FOREIGN KEY (id_smartphone)
+        REFERENCES smartphone(id_smartphone) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+    }
+
+    function renderSqlSection() {
+      const ddl = generateSqlDdl();
+      const block = document.getElementById('sqlCodeBlock');
+      const modalBlock = document.getElementById('modalSqlCodeBlock');
+      if (block) block.textContent = ddl;
+      if (modalBlock) modalBlock.textContent = ddl;
+    }
+
+    function openSqlModal() {
+      renderSqlSection();
+      const modal = document.getElementById('sqlModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSqlModal() {
+      const modal = document.getElementById('sqlModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function copySqlScript() {
+      const text = generateSqlDdl();
+      try {
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = text;
+        tempTextarea.setAttribute('readonly', '');
+        tempTextarea.style.position = 'absolute';
+        tempTextarea.style.left = '-9999px';
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(tempTextarea);
+        if (ok) {
+          showToast('Skrip SQL DDL berhasil disalin ke clipboard!', 'success');
+        } else {
+          showToast('Gagal menyalin SQL. Silakan salin manual dari kotak kode.', 'warning');
+        }
+      } catch (err) {
+        showToast('Gagal menyalin SQL. Silakan salin manual dari kotak kode.', 'error');
+      }
+    }
+
+    // Master Refresh Function
+    function refreshAll() {
+      const topsisData = calculateTOPSIS();
+      renderDashboard(topsisData);
+      renderSteps(topsisData);
+      if (activeTab === 'alternatif') {
+        renderPhonesTable();
+      }
+    }
+
+    // Initial Boot
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCriteriaSliders();
+      renderSqlSection();
+      switchTab('dashboard');
+      refreshAll();
+    });
+  </script>
+</body>
+</html>
